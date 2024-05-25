@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router(); 
 const { check, validationResult } = require('express-validator');
 
-const Word = require('../../models/Word');
+const {Dictionary,MasteredWords} = require('../../models/Models');
 
 
 router.post('/',
@@ -15,10 +15,11 @@ router.post('/',
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    let { word, meaning, mastered } = req.body;
-
+    let { word, meaning, mastered,weight } = req.body;
+    weight=0
+    
     try {
-      let word1 = await Word.findOne({ word });
+      let word1 = await Dictionary.findOne({ word });
 
       if (word1) {
         return res
@@ -26,10 +27,17 @@ router.post('/',
           .json({ errors: [{ msg: 'word already exists' }] });
       }
 
-      newWord = new Word({
+      const masteredWord = await MasteredWords.findOne({ word });
+
+      if (masteredWord) {
+        mastered = false; // Ensure mastered is set to false
+      }
+
+      newWord = new Dictionary({
         word,
         meaning,
-        mastered,
+        mastered:false,
+        weight,
       });
 
       await newWord.save(); 
