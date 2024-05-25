@@ -9,10 +9,13 @@ const WordSchema = new mongoose.Schema({
   meaning: {
     type: String,
     required: true,
-  },
-  mastered: {
+  },mastered: {
     type: Boolean,
-  },
-});
+    required: true,
+  },weight: {
+    type: Number,
+    required: true,
+  }
+})
 
-module.exports = mongoose.model('dictionory', WordSchema);
+module.exports = WordSchema;
