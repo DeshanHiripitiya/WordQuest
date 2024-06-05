@@ -82,7 +82,7 @@ axios
     console.error('Error deleting word:', error);
   });
   }
-
+git 
   return (
     <div className='p-4 border border-gray-400 rounded'>
       <h2 className='text-lg font-bold mb-4'>Word Game</h2>
