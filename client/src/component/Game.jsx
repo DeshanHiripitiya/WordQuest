@@ -25,29 +25,47 @@ function Game() {
       const randomWord =
         masteredWords[Math.floor(Math.random() * masteredWords.length)];
       setCurrentWord(randomWord);
+      // console.log("startt weight "+randomWord.weight);
       setGameStarted(true);
       setUserInput('');
       setResultMessage('');
     }
   };
 
-  const checkAnswer = () => {
+  const editWordContent = async (prevWeight) => {
+    await axios
+      .put(`http://localhost:5000/api/game/${currentWord._id}`, {
+        weight:prevWeight,
+      })
+      .then((response) => {
+        setCurrentWord(response.data.updatedWord);
+        // console.log("last weight "+currentWord.weight);
+      })
+      .catch((error) => {
+        console.error('Error updating word weight:', error);
+      });
+  }
+
+  const checkAnswer = async () => {
     if (currentWord.word.toLowerCase() === userInput.trim().toLowerCase()) {
-      // Correct answer
-      axios
-        .put(`http://localhost:5000/api/game/${currentWord._id}`, {
-          weight: currentWord.weight + 1,
-        })
-        .then((response) => {
-          setResultMessage('Correct!');
-          setCurrentWord(response.data);
-        })
-        .catch((error) => {
-          console.error('Error updating word weight:', error);
-        });
+      setResultMessage('Correct!');
+      if (currentWord.weight < 5) {
+        currentWord.weight= currentWord.weight + 1
+        await editWordContent(currentWord.weight);
+        setMasteredWords((prevWords) =>
+          prevWords.filter((word) => word._id !== currentWord._id)
+        );
+      } else {
+        currentWord.weight = 999;
+        await editWordContent(currentWord.weight);
+        await deleteFromMasteredWords(currentWord._id);
+      }
     } else {
       // Incorrect answer
       setResultMessage(`Incorrect! The correct word is ${currentWord.word}.`);
+      currentWord.weight=0;
+      await editWordContent(currentWord.weight);
+      // console.log(currentWord.word);
     }
   };
 
@@ -60,9 +78,6 @@ function Game() {
         weight: 0,
       })
       .then(() => {
-        setMasteredWords((prevWords) =>
-          prevWords.filter((word) => word._id !== currentWord._id)
-        );
         deleteFromMasteredWords(currentWord._id);
         setResultMessage('Word added back to dictionary.');
       })
@@ -71,18 +86,20 @@ function Game() {
       });
   };
 
-  const deleteFromMasteredWords = (id) =>{
+  const deleteFromMasteredWords = async (id) =>{
 axios
   .delete(`http://localhost:5000/api/game/${id}`)
   .then(() => {
-    setCurrentWord(null);
-    setGameStarted(false);
+    // console.log(currentWord.word+' deleted');
+    setMasteredWords((prevWords) =>
+      prevWords.filter((word) => word._id !== currentWord._id)
+    );
+    // setCurrentWord(null);
   })
   .catch((error) => {
     console.error('Error deleting word:', error);
   });
   }
-git 
   return (
     <div className='p-4 border border-gray-400 rounded'>
       <h2 className='text-lg font-bold mb-4'>Word Game</h2>
@@ -96,7 +113,7 @@ git
       ) : (
         <div>
           <div className='mb-4'>
-            <span className='font-bold'>Meaning:</span> {currentWord.meaning}
+            <span className='font-bold'>Meaning:</span> {currentWord.meaning+' ('+currentWord.weight+')'}
           </div>
           <input
             type='text'
