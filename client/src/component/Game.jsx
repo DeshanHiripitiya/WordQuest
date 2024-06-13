@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
 function Game() {
@@ -7,6 +7,11 @@ function Game() {
   const [userInput, setUserInput] = useState('');
   const [gameStarted, setGameStarted] = useState(false);
   const [resultMessage, setResultMessage] = useState('');
+  const [buttonToPress, setButtonToPress] = useState('check');      
+
+  const checkButtonRef = useRef(null);
+  const nextButtonRef = useRef(null);
+  const focusInputRef = useRef(null);
 
   useEffect(() => {
     // Fetch mastered words from the server
@@ -19,6 +24,31 @@ function Game() {
         console.error('Error fetching mastered words:', error);
       });
   }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Enter') {
+        if (buttonToPress === 'check') {
+          checkButtonRef.current.click();
+        } else if (buttonToPress === 'next') {
+          nextButtonRef.current.click();
+          setButtonToPress('check');
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [buttonToPress]);
+
+   useEffect(() => {
+     if (gameStarted && focusInputRef.current) {
+       focusInputRef.current.focus();
+     }
+   }, [gameStarted]);
+
 
   const startGame = () => {
     if (masteredWords.length > 0) {
@@ -67,6 +97,7 @@ function Game() {
       await editWordContent(currentWord.weight);
       // console.log(currentWord.word);
     }
+    setButtonToPress('next');
   };
 
   const addToDictionary = () => {
@@ -113,17 +144,20 @@ axios
       ) : (
         <div>
           <div className='mb-4'>
-            <span className='font-bold'>Meaning:</span> {currentWord.meaning+' ('+currentWord.weight+')'}
+            <span className='font-bold'>Meaning:</span>{' '}
+            {currentWord.meaning + ' (' + currentWord.weight + ')'}
           </div>
           <input
             type='text'
             value={userInput}
+            ref={focusInputRef}
             onChange={(e) => setUserInput(e.target.value)}
             className='border p-2 rounded mb-4'
             placeholder='Enter the word'
           />
           <button
             onClick={checkAnswer}
+            ref={checkButtonRef}
             className='px-4 py-2 bg-green-500 text-white rounded mr-2'
           >
             Check
@@ -133,6 +167,7 @@ axios
               <p>{resultMessage}</p>
               <button
                 onClick={startGame}
+                ref={nextButtonRef}
                 className='px-4 py-2 bg-blue-500 text-white rounded'
               >
                 Next
