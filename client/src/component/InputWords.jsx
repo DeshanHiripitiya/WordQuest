@@ -1,9 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect,useRef } from 'react';
 import axios from 'axios';
 
 function WordInputForm() {
   const [word, setWord] = useState('');
   const [meaning, setMeaning] = useState('');
+
+  const inputRef = useRef(null);
+
+  useEffect(()=>{
+inputRef.current.focus();
+  })
 
   const handleAdd = () => {
     const data = {
@@ -33,6 +39,7 @@ function WordInputForm() {
         <label className='block text-gray-700'>Word</label>
         <input
           type='text'
+          ref={inputRef}
           value={word}
           onChange={(e) => setWord(e.target.value)}
           className='w-full p-2 border border-gray-400 rounded'
