@@ -27,6 +27,7 @@ function Game() {
 
   useEffect(() => {
     const handleKeyDown = (event) => {
+      // console.log(buttonToPress);
       if (event.key === 'Enter') {
         if (buttonToPress === 'check') {
           checkButtonRef.current.click();
