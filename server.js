@@ -1,5 +1,5 @@
 const express = require('express');
-const { connectDB } = require('./config/db');
+const { connectDB, sequelize } = require('./config/db');
 const cors = require('cors');
 
 const app = express();

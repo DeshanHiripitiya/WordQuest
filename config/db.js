@@ -9,7 +9,10 @@ const sequelize = new Sequelize('wordquest', 'root', 'Nipuna2001', {
 const connectDB = async () => {
   try {
     await sequelize.authenticate();
-    console.log(`Database connected: ${sequelize.config.database}`);
+    // loadWordsIntoTrie();
+    console.log(
+      `Database connected: ${sequelize.config.database} and Trie populated`
+    );
 
     // Sync all models (use { force: true } for debugging, { alter: true } for production)
     await sequelize.sync();
