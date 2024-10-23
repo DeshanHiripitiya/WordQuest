@@ -15,6 +15,8 @@ app.use(express.json({ extended: false }));
 app.use('/api/words', require('./routes/api/words'));
 app.use('/api/dictionory', require('./routes/api/dictionory'));
 app.use('/api/game', require('./routes/api/game'));
+app.use('/api', require('./routes/api/user'));
+// app.use('/api/register', require('./routes/api/register'));
 
 // Define the port
 const PORT = process.env.PORT || 5000;
