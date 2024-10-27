@@ -1,4 +1,4 @@
-import React, { useState,useEffect,useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
 function WordInputForm() {
@@ -7,9 +7,9 @@ function WordInputForm() {
 
   const inputRef = useRef(null);
 
-  useEffect(()=>{
-inputRef.current.focus();
-  })
+  useEffect(() => {
+    inputRef.current.focus();
+  });
 
   const handleAdd = () => {
     const data = {
