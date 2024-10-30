@@ -1,36 +1,49 @@
 import { useState } from 'react';
 
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+
 import { Typography, Input, Button } from '@material-tailwind/react';
 import { EyeSlashIcon, EyeIcon } from '@heroicons/react/24/solid';
 
-export function Login() {
-  const [formData, setFormData] = useState({
-    email: '',
-    password1: '',
-    password2: '',
-  });
-
-  const { email, password1, password2 } = formData;
-
+export function Registration() {
   const [passwordShown, setPasswordShown] = useState(false);
   const togglePasswordVisiblity = () => setPasswordShown((cur) => !cur);
 
   const [passwordShown2, setPasswordShown2] = useState(false);
   const togglePasswordVisiblity2 = () => setPasswordShown2((cur) => !cur);
 
-  //submit registration form
-  const submit = (e) => {
-    e.preventDefault(); // Prevents page reload on form submission
-    //  console.log(formData);
-    validation(formData);
-  };
-
   //validate register form data
-  const validation = (e) => {
-    console.log(formData);
-    //password validation
-    
-  };
+  const validation = Yup.object({
+    email: Yup.string()
+      .email('invalid email format')
+      .required('Email is required'),
+    password1: Yup.string().required('Password is required'),
+    password2: Yup.string()
+      .oneOf([Yup.ref('password1'), null], 'Must match "password" field value')
+      .required('Enter password again'),
+  });
+
+  // formik object
+  const formik = useFormik({
+    initialValues: {
+      email: '',
+      password1: '',
+      password2: '',
+    },
+    validationSchema: validation,
+    onSubmit: (values) => {
+      console.log('formik called');
+      console.log(values);
+      const response = axios.post("http://localhost:5000/api/register",values);
+      console.log(response);
+      
+    },
+    validateOnChange: false,
+    validateOnBlur: false,
+  });
+
+
 
   return (
     <section className='grid text-center h-screen items-center p-8'>
@@ -41,7 +54,11 @@ export function Login() {
         <Typography className='mb-16 text-gray-600 font-normal text-[18px]'>
           Enter your email and password to sign up
         </Typography>
-        <form onSubmit={submit} className='mx-auto max-w-[24rem] text-left'>
+        <form
+          onSubmit={formik.handleSubmit}
+          className='mx-auto max-w-[24rem] text-left'
+        >
+          {/* email */}
           <div className='mb-6'>
             <label htmlFor='email'>
               <Typography
@@ -57,17 +74,22 @@ export function Login() {
               size='lg'
               type='email'
               name='email'
-              value={email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
+              value={formik.values.email}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
               placeholder='name@mail.com'
               className='w-full placeholder:opacity-100 focus:border-t-primary border-t-blue-gray-200'
               labelProps={{
                 className: 'hidden',
               }}
             />
+            {formik.errors.email && (
+              <Typography color='red' variant='small'>
+                {formik.errors.email}
+              </Typography>
+            )}
           </div>
+          {/* password */}
           <div className='mb-6'>
             <label htmlFor='password'>
               <Typography
@@ -78,12 +100,14 @@ export function Login() {
               </Typography>
             </label>
             <Input
+              id='password1'
+              name='password1'
+              color='gray'
               size='lg'
               placeholder='********'
-              value={password1}
-              onChange={(e) =>
-                setFormData({ ...formData, password1: e.target.value })
-              }
+              value={formik.values.password1}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
               labelProps={{
                 className: 'hidden',
               }}
@@ -99,9 +123,15 @@ export function Login() {
                 </i>
               }
             />
+            {formik.errors.password1 && (
+              <Typography color='red' variant='small'>
+                {formik.errors.password1}
+              </Typography>
+            )}
           </div>
-
+          {/* confirm password */}
           <div className='mb-6'>
+            {/* text */}
             <label htmlFor='password'>
               <Typography
                 variant='small'
@@ -110,18 +140,21 @@ export function Login() {
                 Confirm Password
               </Typography>
             </label>
+            {/* input field */}
             <Input
+              id='password2'
               size='lg'
               placeholder='********'
-              value={password2}
-              onChange={(e) =>
-                setFormData({ ...formData, password2: e.target.value })
-              }
+              name='password2'
+              value={formik.values.password2}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
               labelProps={{
                 className: 'hidden',
               }}
               className='w-full placeholder:opacity-100 focus:border-t-primary border-t-blue-gray-200'
               type={passwordShown2 ? 'text' : 'password'}
+              // icon
               icon={
                 <i onClick={togglePasswordVisiblity2}>
                   {passwordShown2 ? (
@@ -132,7 +165,15 @@ export function Login() {
                 </i>
               }
             />
+            {/* validation errors */}
+            {formik.errors.password2 && (
+              <Typography color='red' variant='small'>
+                {formik.errors.password2}
+              </Typography>
+            )}
           </div>
+
+          {/* registor button */}
           <Button
             color='green'
             size='lg'
@@ -182,4 +223,4 @@ export function Login() {
   );
 }
 
-export default Login;
+export default Registration;
